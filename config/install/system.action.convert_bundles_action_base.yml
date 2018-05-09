@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - action
+    - node
+    - convert_bundles
+id: convert_bundles
+label: 'Convert Entity Bundles'
+type: node
+plugin: convert_bundles_action_base
