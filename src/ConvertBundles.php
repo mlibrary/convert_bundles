@@ -20,7 +20,7 @@ class ConvertBundles {
     $ids = $query->execute();
     $entities = [];
     foreach ($ids as $id) {
-      $entities[] = \Drupal::entityTypeManager()->getStorage($type)->load($id);
+      $entities[$id] = \Drupal::entityTypeManager()->getStorage($type)->load($id);
     }
     return $entities;
   }
@@ -144,7 +144,6 @@ class ConvertBundles {
     $update_fields = [];
     // Remove stuff we don't need.
     $unset_data = ['op', 'form_build_id', 'form_token', 'form_id'];
-//getting new fields for mapped fields here!!! exit(print_r($fields_new_to));
     foreach ($userInput as $from => $to) {
       if (in_array($from, $unset_data)) {
         continue;
@@ -159,12 +158,7 @@ class ConvertBundles {
         ];
       }
       else {
-        echo '<pre>';
         foreach ($fields_from as $bundle => $field_def) {
-          echo 'from:'.$from;
-          echo 'to:'.$to;
-          print_r($field_def[$from]);
-          echo "BREAK";
           $map_fields[$from] = [
             'field' => $to,
             'from_label' => $field_def[$from]->getLabel(),
@@ -174,7 +168,6 @@ class ConvertBundles {
         }
       }
     }
-
     return ['map_fields' => $map_fields, 'update_fields' => $update_fields];
   }
 
