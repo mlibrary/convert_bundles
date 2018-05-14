@@ -225,7 +225,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         ],
         [
           '\Drupal\convert_bundles\ConvertBundles::addNewFields',
-          [$this->entityType, $ids, $limit, $map_fields],
+          [$this->entityType, $ids, $limit, $map_fields, $this->fieldsTo, $this->entities],
         ],
       ],
       'finished' => '\Drupal\convert_bundles\ConvertBundles::ConvertBundlesFinishedCallback',

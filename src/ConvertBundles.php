@@ -28,30 +28,6 @@ class ConvertBundles {
   /**
    * {@inheritdoc}
    */
-  public static function updateBundles($entities, $fields, &$context) {
-    $message = 'Updating Bundles...';
-    $results = [];
-    $update = FALSE;
-    foreach ($entities as $entity) {
-      foreach ($fields as $field_name => $field_value) {
-        if ($entity->hasField($field_name)) {
-          $field_value = array_filter(array_filter($field_value, "is_numeric", ARRAY_FILTER_USE_KEY));
-          $entity->get($field_name)->setValue($field_value);
-          $update = TRUE;
-        }
-      }
-      if ($update) {
-        $entity->setNewRevision();
-        $entity->save();
-      }
-    }
-    $context['message'] = $message;
-    $context['results'] = $results;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function getFromFields($fields_from_bundle, $fields_to_names, $fields_to_types) {
     $fields_from_names = [];
     $form = [];
@@ -245,7 +221,7 @@ class ConvertBundles {
   /**
    * {@inheritdoc}
    */
-  public static function addNewFields($entity_type, $ids, $limit, $map_fields, &$context) {
+  public static function addNewFields($entity_type, $ids, $limit, $map_fields, $fields_to, $entities, &$context) {
     if (empty($context['sandbox'])) {
       // Flush cache so we recognize new bundle type before updates.
       drupal_flush_all_caches();
@@ -256,6 +232,7 @@ class ConvertBundles {
 
     $current_ids = array_slice($ids, $context['sandbox']['current_id'], $limit, TRUE);
     foreach ($current_ids as $key => $id) {
+      $old_entity = $entities[$id];
       $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($id);
       foreach ($map_fields as $map_from => $map_to) {
         if (isset($map_to['field']) && $map_to['field'] == 'remove') {
@@ -264,19 +241,21 @@ class ConvertBundles {
 
         $value = '';
         // TODO Need to get multiple values.
-        if ($entity->$map_from) {
+        if ($old_entity->hasField($map_from)) {
           // Because might be target_id.
-          $val_name = $entity->$map_from->getFieldDefinition()->getFieldStorageDefinition()->getMainPropertyName();
-          $value = $entity->$map_from->$val_name;
-          // Because datetime/date may need converting
-          // TODO date with time did not insert into date only fields
-          // need to test if date without time will insert into date with time
-          // or better yet, find a better way to do this.
-          $from_type = $entity->$map_from->getFieldDefinition()->getFieldStorageDefinition()->getType();
-          $to_type = $fields_to[$map_to['field']];
-          if (!empty($to_type) && in_array('datetime', [$to_type, $from_type])) {
-            $date = new \DateTime($value);
-            $value = $date->format('Y-m-d');
+          $val_name = $old_entity->get($map_from)->getFieldDefinition()->getFieldStorageDefinition()->getMainPropertyName();
+          $value = $old_entity->get($map_from)->$val_name;
+          if ($map_to['field'] != 'append_to_body') {
+            // Because datetime/date may need converting
+            // TODO date with time did not insert into date only fields
+            // need to test if date without time will insert into date with time
+            // or better yet, find a better way to do this.
+            $from_type = $old_entity->get($map_from)->getFieldDefinition()->getFieldStorageDefinition()->getType();
+            $to_type = $fields_to[$map_to['field']];
+            if (!empty($to_type) && in_array('datetime', [$to_type, $from_type])) {
+              $date = new \DateTime($value);
+              $value = $date->format('Y-m-d');
+            }
           }
         }
 
@@ -309,7 +288,7 @@ class ConvertBundles {
           ]);
         }
         elseif (!empty($value)) {
-          $val_name = $entity->$map_to['field']->getFieldDefinition()->getFieldStorageDefinition()->getMainPropertyName();
+          $val_name = $entity->get($map_to['field'])->getFieldDefinition()->getFieldStorageDefinition()->getMainPropertyName();
           $entity->get($map_to['field'])->setValue([[$val_name => $value]]);
         }
       }
@@ -329,7 +308,7 @@ class ConvertBundles {
   /**
    * {@inheritdoc}
    */
-  public function convertBundlesFinishedCallback($success, $results, $operations) {
+  public static function convertBundlesFinishedCallback($success, $results, $operations) {
     // The 'success' parameter means no fatal PHP errors were detected. All
     // other error management should be handled using 'results'.
     if ($success) {
