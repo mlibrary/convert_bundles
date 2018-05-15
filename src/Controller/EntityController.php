@@ -3,8 +3,6 @@
 namespace Drupal\convert_bundles\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\PrivateTempStoreFactory;
@@ -83,7 +81,7 @@ class EntityController extends ControllerBase {
     $this->tempStoreFactory->get('convert_bundles_ids')
       ->set($this->currentUser, $ids);
 
-    return $this->redirect('convert_bundles.form', [], ['query' => ['destination' => '/'.$entity->getEntityTypeId().'/'.$entity->id()]]);
+    return $this->redirect('convert_bundles.form', [], ['query' => ['destination' => '/' . $entity->getEntityTypeId() . '/' . $entity->id()]]);
   }
 
 }

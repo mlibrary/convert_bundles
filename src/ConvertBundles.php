@@ -134,7 +134,7 @@ class ConvertBundles {
         ];
       }
       else {
-        foreach ($fields_from as $bundle => $field_def) {
+        foreach ($fields_from as $field_def) {
           $map_fields[$from] = [
             'field' => $to,
             'from_label' => $field_def[$from]->getLabel(),
@@ -153,7 +153,7 @@ class ConvertBundles {
   public static function getFieldTableNames($entity_type, $fields_from) {
     $table_mapping = \Drupal::service('entity_type.manager')->getStorage($entity_type)->getTableMapping();
     $field_table_names = [];
-    foreach ($fields_from as $bundle => $field_key) {
+    foreach ($fields_from as $field_key) {
       foreach ($field_key as $field) {
         if ($field->getFieldStorageDefinition()->isBaseField() == FALSE) {
           $field_name = $field->getName();
@@ -303,7 +303,6 @@ class ConvertBundles {
       $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
     }
   }
-
 
   /**
    * {@inheritdoc}

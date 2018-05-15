@@ -15,7 +15,7 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
-use Drupal\Core\Routing\RouteMatchInterface ;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
 
 /**
@@ -162,6 +162,16 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
    *   Session.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   User.
+   * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
+   *   EntityQuery.
+   * @param \Drupal\Core\Entity\EntityFieldManager $entity_field_manager
+   *   EntityFieldManager.
+   * @param \Drupal\Core\Entity\EntityTypeManager $entity_type_manager
+   *   EntityTypeManager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfo $bundle_info
+   *   EntityTypeBundleInfo.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   RouteMatch.
    * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
    *   Route.
    */
@@ -204,12 +214,12 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
   /**
    * {@inheritdoc}
    */
-  public function ConvertBundles() {
-    $base_table_names = ConvertBundles::getBaseTableNames($this->entityType);
-    $userInput = ConvertBundles::sortUserInput($this->userInput, $this->fieldsNewTo, $this->fieldsFrom);
+  public function convertBundles() {
+    $base_table_names = convertBundles::getBaseTableNames($this->entityType);
+    $userInput = convertBundles::sortUserInput($this->userInput, $this->fieldsNewTo, $this->fieldsFrom);
     $map_fields = $userInput['map_fields'];
     $update_fields = $userInput['update_fields'];
-    $field_table_names = ConvertBundles::getFieldTableNames($this->entityType, $this->fieldsFrom);
+    $field_table_names = convertBundles::getFieldTableNames($this->entityType, $this->fieldsFrom);
     $ids = array_keys($this->entities);
     $limit = 100;
     $batch = [
@@ -225,7 +235,14 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         ],
         [
           '\Drupal\convert_bundles\ConvertBundles::addNewFields',
-          [$this->entityType, $ids, $limit, $map_fields, $this->fieldsTo, $this->entities],
+          [
+            $this->entityType,
+            $ids,
+            $limit,
+            $map_fields,
+            $this->fieldsTo,
+            $this->entities,
+          ],
         ],
       ],
       'finished' => '\Drupal\convert_bundles\ConvertBundles::ConvertBundlesFinishedCallback',
@@ -244,6 +261,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         $form_state->setRebuild();
         $this->entityType = $form_state->getValues()['convert_entity_type'];
         break;
+
       case 2:
         $form_state->setRebuild();
         $this->fromType = array_filter($form_state->getValues()['convert_bundles_from']);
@@ -251,10 +269,12 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
           $this->entities = ConvertBundles::getEntities($this->entityType, $this->fromType);
         }
         break;
+
       case 3:
         $form_state->setRebuild();
         $this->toType = $form_state->getValues()['convert_bundles_to'];
         break;
+
       case 4:
         $form_state->setRebuild();
         $data_to_process = array_diff_key(
@@ -338,11 +358,9 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
           $this->step++;
           goto two;
         }
-        $entities_with_bundles = [];
         $options = [];
         foreach (array_keys($this->entityTypeManager->getDefinitions()) as $entity_type) {
           if (!empty($bundles = $this->bundleInfo->getAllBundleInfo()[$entity_type]) && count($bundles) > 1) {
-            $entities_with_bundles[$entity_type] = $bundles;
             $options[$entity_type] = $entity_type;
           }
         }
@@ -357,6 +375,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
           '#empty' => $this->t('No convertable types found'),
         ];
         break;
+
       case 2:
         two:
         $options = [];
@@ -369,7 +388,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
             $entity_types[] = $entity->getEntityTypeId();
           }
           if (count($entity_type = array_unique($entity_types)) > 1) {
-            drupal_set_message('We cant convert multiple types of entities at once', 'error');
+            drupal_set_message($this->t('We cant convert multiple types of entities at once'), 'error');
           }
           $this->entityType = $entity_type[0];
         }
@@ -399,6 +418,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
           '#empty' => $this->t('No bundles found'),
         ];
         break;
+
       case 3:
         three:
         $form['#title'] .= ' - ' . $this->t('Select the Bundle to Convert Selected Entities to');
@@ -408,6 +428,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
           '#options' => $this->allBundles,
         ];
         break;
+
       case 4:
         // Get the fields.
         $entityFieldManager = $this->entityFieldManager;
@@ -474,7 +495,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         break;
 
       case 7:
-        $from_types = implode(', ',$this->fromType);
+        $from_types = implode(', ', $this->fromType);
         drupal_set_message($this->t('Are you sure you want to convert all selected entities of type <em>@from_type</em> to type <em>@to_type</em>?',
                              [
                                '@from_type' => $from_types,
