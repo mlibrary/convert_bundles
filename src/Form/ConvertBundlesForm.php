@@ -380,6 +380,11 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         if (empty($bundles)) {
           $bundles = array_keys($all_bundles);
         }
+        if (count($bundles) == 1) {
+          $this->step++;
+          $this->fromType = $bundles;
+          goto three;
+        }
         foreach (array_unique($bundles) as $bundle) {
           $options[$bundle]['bundle_names'] = $all_bundles[$bundle]['label'];
         }
@@ -395,6 +400,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         ];
         break;
       case 3:
+        three:
         $form['#title'] .= ' - ' . $this->t('Select the Bundle to Convert Selected Entities to');
         $form['convert_bundles_to'] = [
           '#type' => 'select',
