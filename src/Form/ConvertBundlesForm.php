@@ -360,7 +360,8 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         }
         $options = [];
         foreach (array_keys($this->entityTypeManager->getDefinitions()) as $entity_type) {
-          if (!empty($bundles = $this->bundleInfo->getAllBundleInfo()[$entity_type]) && count($bundles) > 1) {
+          $bundles = $this->bundleInfo->getAllBundleInfo();
+          if (isset($bundles[$entity_type]) && !empty($bundles[$entity_type]) && count($bundles[$entity_type]) > 1) {
             $options[$entity_type] = $entity_type;
           }
         }
