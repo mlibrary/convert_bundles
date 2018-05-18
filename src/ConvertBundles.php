@@ -183,7 +183,7 @@ class ConvertBundles {
     if ($entity_type == 'node') {
       $id = 'nid';
     }
-    elseif ($entity_type = 'taxonomy_term') {
+    elseif ($entity_type == 'taxonomy_term') {
       $id = 'tid';
       $type = 'vid';
     }
