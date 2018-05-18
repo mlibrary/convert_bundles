@@ -2,12 +2,13 @@
 
 namespace Drupal\convert_bundles\Plugin\Action;
 
-use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\PrivateTempStoreFactory;
 use Drupal\Core\Session\SessionManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Update Bundles.
@@ -19,7 +20,7 @@ use Drupal\Core\Session\SessionManagerInterface;
  *   confirm_form_route_name = "convert_bundles.form"
  * )
  */
-class ConvertBundlesActionBase extends ActionBase implements ContainerFactoryPluginInterface {
+class ConvertBundlesActionBase extends ConfigurableActionBase implements ContainerFactoryPluginInterface {
   /**
    * The plugin_id.
    *
@@ -131,4 +132,23 @@ class ConvertBundlesActionBase extends ActionBase implements ContainerFactoryPlu
     return $object->access('update', $account, $return_as_object);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+  }
 }

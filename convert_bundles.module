@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Contains convert_bundles.module..
+ */
+
+use Drupal\system\Entity\Action;
+
+/**
+ * Implements hook_install().
+ */
+function convert_bundles_install() {
+  foreach (array_keys(\Drupal::entityTypeManager()->getDefinitions()) as $entity_type) {
+    // Creating a new configured action.
+    $action = Action::create([
+      'id' => 'convert_bundles_on_'.$entity_type,
+      'label' => 'Convert Entity Bundles',
+      'type' => $entity_type,
+      'configuration' => [],
+      'plugin' => 'convert_bundles_action_base',
+    ]);
+    $action->save();
+  }
+}
