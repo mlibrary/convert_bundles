@@ -11,12 +11,12 @@ use Drupal\system\Entity\Action;
  * Implements hook_install().
  */
 function convert_bundles_install() {
-  foreach (array_keys(\Drupal::entityTypeManager()->getDefinitions()) as $entity_type) {
+  foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_type_machine_name => $entity_type) {
     // Creating a new configured action.
     $action = Action::create([
-      'id' => 'convert_bundles_on_'.$entity_type,
-      'label' => 'Convert Entity Bundles',
-      'type' => $entity_type,
+      'id' => 'convert_bundles_on_'.$entity_type_machine_name,
+      'label' => 'Convert '.$entity_type->getLabel().' Entity Bundles',
+      'type' => $entity_type_machine_name,
       'configuration' => [],
       'plugin' => 'convert_bundles_action_base',
     ]);
