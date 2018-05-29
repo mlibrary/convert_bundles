@@ -151,4 +151,5 @@ class ConvertBundlesActionBase extends ConfigurableActionBase implements Contain
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
   }
+
 }
