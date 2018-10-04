@@ -305,6 +305,9 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         $values = $form_state->getValues()['default_value_input'];
         foreach ($values as $key => $value) {
           unset($values[$key]['add_more']);
+          if (isset($value['value'])) {
+            $values[$key] = $value['value'];
+          }
         }
         $data_to_process = array_diff_key(
                             $values,
