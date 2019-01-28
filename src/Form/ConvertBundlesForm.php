@@ -364,7 +364,8 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         $options = [];
         foreach (array_keys($this->entityTypeManager->getDefinitions()) as $entity_type) {
           $bundles = $this->bundleInfo->getAllBundleInfo();
-          if (isset($bundles[$entity_type]) && !empty($bundles[$entity_type]) && count($bundles[$entity_type]) > 1) {
+          $storage = \Drupal::service('entity_type.manager')->getStorage($entity_type);
+          if (isset($bundles[$entity_type]) && !empty($bundles[$entity_type]) && count($bundles[$entity_type]) > 1 && method_exists($storage, 'getBaseTable') && method_exists($storage, 'getDataTable')) {
             $options[$entity_type] = $entity_type;
           }
         }
