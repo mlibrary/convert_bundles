@@ -15,8 +15,13 @@ class ConvertBundles {
    */
   public static function getEntities($type, $bundles) {
     // Get the entity IDs to update.
+    $column = 'type';
+    // TODO: Find columns for all entity types.
+    if ($type == 'taxonomy_term') {
+      $column = 'vid';
+    }
     $query = \Drupal::service('entity.query')->get($type);
-    $query->condition('type', $bundles);
+    $query->condition($column, $bundles);
     $ids = $query->execute();
     $entities = [];
     foreach ($ids as $id) {
@@ -135,12 +140,14 @@ class ConvertBundles {
       }
       else {
         foreach ($fields_from as $field_def) {
-          $map_fields[$from] = [
-            'field' => $to,
-            'from_label' => $field_def[$from]->getLabel(),
-          // This will come in later.
-            'value' => [],
-          ];
+          if (isset($field_def[$from])) {
+            $map_fields[$from] = [
+              'field' => $to,
+              'from_label' => $field_def[$from]->getLabel(),
+            // This will come in later.
+              'value' => [],
+            ];
+          }
         }
       }
     }
