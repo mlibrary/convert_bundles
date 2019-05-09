@@ -500,12 +500,14 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         break;
 
       case 7:
+        $count = \Drupal::translation()->formatPlural(count($this->entities), '1 selected entity', '@count selected entities');
         $from_types = implode(', ', $this->fromType);
-        drupal_set_message($this->t('Are you sure you want to convert all selected entities of type <em>@from_type</em> to type <em>@to_type</em>?',
-                             [
-                               '@from_type' => $from_types,
-                               '@to_type' => $this->toType,
-                             ]), 'warning');
+        drupal_set_message($this->t('Are you sure you want to convert @target of type <em>@from_type</em> to type <em>@to_type</em>?',
+         [
+           '@target' => $count,
+           '@from_type' => $from_types,
+           '@to_type' => $this->toType,
+         ]), 'warning');
         $form['actions']['submit'] = [
           '#type' => 'submit',
           '#value' => $this->t('Convert'),
