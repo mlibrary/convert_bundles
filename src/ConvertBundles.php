@@ -112,7 +112,9 @@ class ConvertBundles {
     // Get the names of the base tables.
     $base_table_names = [];
     $base_table_names[] = $storage->getBaseTable();
-    $base_table_names[] = $storage->getDataTable();
+    if (!empty($storage->getDataTable())) {
+      $base_table_names[] = $storage->getDataTable();
+    }
     return $base_table_names;
   }
 
@@ -213,12 +215,14 @@ class ConvertBundles {
     $db = Database::getConnection();
     // Field tables have 'entity_id' and 'bundle' columns.
     foreach ($field_table_names as $field_name => $table_name) {
-      // Only do this when from and to fields are the same.
-      if (in_array(str_replace('_revision', '', $field_name), $update_fields)) {
-        $results[] = $db->update($table_name)
-          ->fields(['bundle' => $to_type])
-          ->condition('entity_id', $ids, 'IN')
-          ->execute();
+      if ($db->schema()->tableExists($table_name)) {
+        // Only do this when from and to fields are the same.
+        if (in_array(str_replace('_revision', '', $field_name), $update_fields)) {
+          $results[] = $db->update($table_name)
+            ->fields(['bundle' => $to_type])
+            ->condition('entity_id', $ids, 'IN')
+            ->execute();
+        }
       }
     }
     $context['message'] = $message;
