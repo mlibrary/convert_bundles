@@ -2,6 +2,6 @@ services:
 
   convert_bundles.route_subscriber:
     class: Drupal\convert_bundles\Routing\RouteSubscriber
-    arguments: ['@entity.manager']
+    arguments: ['@entity_type.manager']
     tags:
       - { name: event_subscriber }

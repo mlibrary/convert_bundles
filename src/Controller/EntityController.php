@@ -5,7 +5,7 @@ namespace Drupal\convert_bundles\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 
@@ -41,7 +41,7 @@ class EntityController extends ControllerBase {
   /**
    * Constructs a \Drupal\convert_bundles\Controller\EntityController.
    *
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   Temp storage.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session.
@@ -59,7 +59,7 @@ class EntityController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
+      $container->get('tempstore.private'),
       $container->get('session_manager'),
       $container->get('current_user')
     );

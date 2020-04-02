@@ -9,9 +9,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\convert_bundles\ConvertBundles;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
@@ -91,13 +90,6 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
   protected $userInput = [];
 
   /**
-   * The entity query factory service.
-   *
-   * @var \Drupal\Core\Entity\Query\QueryFactory
-   */
-  protected $entityQuery;
-
-  /**
    * The entity field manager service.
    *
    * @var \Drupal\Core\Entity\EntityFieldManager
@@ -156,14 +148,12 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
   /**
    * Constructs a \Drupal\convert_bundles\Form\ConvertBundlesForm.
    *
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   Temp storage.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   User.
-   * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
-   *   EntityQuery.
    * @param \Drupal\Core\Entity\EntityFieldManager $entity_field_manager
    *   EntityFieldManager.
    * @param \Drupal\Core\Entity\EntityTypeManager $entity_type_manager
@@ -175,11 +165,10 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
    * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
    *   Route.
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, SessionManagerInterface $session_manager, AccountInterface $current_user, QueryFactory $entity_query, EntityFieldManager $entity_field_manager, EntityTypeManager $entity_type_manager, EntityTypeBundleInfo $bundle_info, RouteMatchInterface $route_match, RouteBuilderInterface $route_builder) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, SessionManagerInterface $session_manager, AccountInterface $current_user, EntityFieldManager $entity_field_manager, EntityTypeManager $entity_type_manager, EntityTypeBundleInfo $bundle_info, RouteMatchInterface $route_match, RouteBuilderInterface $route_builder) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->sessionManager = $session_manager;
     $this->currentUser = $current_user->id();
-    $this->entityQuery = $entity_query;
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->bundleInfo = $bundle_info;
@@ -192,10 +181,9 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
+      $container->get('tempstore.private'),
       $container->get('session_manager'),
       $container->get('current_user'),
-      $container->get('entity.query'),
       $container->get('entity_field.manager'),
       $container->get('entity_type.manager'),
       $container->get("entity_type.bundle.info"),
@@ -331,7 +319,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         if (method_exists($this, 'ConvertBundles')) {
           $return_verify = $this->ConvertBundles();
         }
-        drupal_set_message($return_verify);
+        \Drupal::messenger()->addStatus($return_verify);
         $this->routeBuilder->rebuild();
         break;
     }
@@ -393,7 +381,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
             $entity_types[] = $entity->getEntityTypeId();
           }
           if (count($entity_type = array_unique($entity_types)) > 1) {
-            drupal_set_message($this->t('We cant convert multiple types of entities at once'), 'error');
+            \Drupal::messenger()->addError($this->t('We cant convert multiple types of entities at once'));
           }
           $this->entityType = $entity_type[0];
         }
@@ -502,12 +490,12 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
       case 7:
         $count = \Drupal::translation()->formatPlural(count($this->entities), '1 selected entity', '@count selected entities');
         $from_types = implode(', ', $this->fromType);
-        drupal_set_message($this->t('Are you sure you want to convert @target of type <em>@from_type</em> to type <em>@to_type</em>?',
+        \Drupal::messenger()->addWarning($this->t('Are you sure you want to convert @target of type <em>@from_type</em> to type <em>@to_type</em>?',
          [
            '@target' => $count,
            '@from_type' => $from_types,
            '@to_type' => $this->toType,
-         ]), 'warning');
+         ]));
         $form['actions']['submit'] = [
           '#type' => 'submit',
           '#value' => $this->t('Convert'),
@@ -515,7 +503,7 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
         ];
         break;
     }
-    drupal_set_message($this->t('This module is experimental. PLEASE do not use on production databases without prior testing and a complete database dump.'), 'warning');
+    \Drupal::messenger()->addWarning($this->t('This module is experimental. PLEASE do not use on production databases without prior testing and a complete database dump.'));
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $submit_label,

@@ -20,7 +20,7 @@ class ConvertBundles {
     if ($type == 'taxonomy_term') {
       $column = 'vid';
     }
-    $query = \Drupal::service('entity.query')->get($type);
+    $query = \Drupal::entityQuery($type);
     $query->condition($column, $bundles);
     $ids = $query->execute();
     $entities = [];
@@ -330,7 +330,7 @@ class ConvertBundles {
     else {
       $message = t('Finished with an error.');
     }
-    drupal_set_message($message);
+    \Drupal::messenger()->addStatus($message);
   }
 
 }
