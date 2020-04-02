@@ -20,6 +20,9 @@ class ConvertBundles {
     if ($type == 'taxonomy_term') {
       $column = 'vid';
     }
+    elseif ($type == 'media') {
+      $column = 'bundle';
+    }
     $query = \Drupal::entityQuery($type);
     $query->condition($column, $bundles);
     $ids = $query->execute();
@@ -195,6 +198,10 @@ class ConvertBundles {
     elseif ($entity_type == 'taxonomy_term') {
       $id = 'tid';
       $type = 'vid';
+    }
+    elseif ($entity_type == 'media') {
+      $id = 'mid';
+      $type = 'bundle';
     }
     foreach ($base_table_names as $table_name) {
       $results[] = $db->update($table_name)
