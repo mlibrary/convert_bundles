@@ -306,8 +306,7 @@ class ConvertBundles {
           ]);
         }
         elseif (!empty($value)) {
-          $val_name = $entity->get($map_to['field'])->getFieldDefinition()->getFieldStorageDefinition()->getMainPropertyName();
-          $entity->get($map_to['field'])->setValue([[$val_name => $value]]);
+          $entity->set($map_to['field'], $old_entity->get($map_from)->getValue());
         }
       }
       $entity->save();
