@@ -203,11 +203,11 @@ class ConvertBundlesForm extends FormBase implements FormInterface {
    * {@inheritdoc}
    */
   public function convertBundles() {
-    $base_table_names = convertBundles::getBaseTableNames($this->entityType);
-    $userInput = convertBundles::sortUserInput($this->userInput, $this->fieldsNewTo, $this->fieldsFrom);
+    $base_table_names = ConvertBundles::getBaseTableNames($this->entityType);
+    $userInput = ConvertBundles::sortUserInput($this->userInput, $this->fieldsNewTo, $this->fieldsFrom);
     $map_fields = $userInput['map_fields'];
     $update_fields = $userInput['update_fields'];
-    $field_table_names = convertBundles::getFieldTableNames($this->entityType, $this->fieldsFrom);
+    $field_table_names = ConvertBundles::getFieldTableNames($this->entityType, $this->fieldsFrom);
     $ids = array_keys($this->entities);
     $limit = 100;
     $batch = [
