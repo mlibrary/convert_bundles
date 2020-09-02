@@ -24,7 +24,7 @@ class ConvertBundles {
       $column = 'bundle';
     }
     $query = \Drupal::entityQuery($type);
-    $query->condition($column, $bundles);
+    $query->condition($column, $bundles, 'IN');
     $ids = $query->execute();
     $entities = [];
     foreach ($ids as $id) {
