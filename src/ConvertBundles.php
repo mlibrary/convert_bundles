@@ -15,14 +15,9 @@ class ConvertBundles {
    */
   public static function getEntities($type, $bundles) {
     // Get the entity IDs to update.
-    $column = 'type';
-    // TODO: Find columns for all entity types.
-    if ($type == 'taxonomy_term') {
-      $column = 'vid';
-    }
-    elseif ($type == 'media') {
-      $column = 'bundle';
-    }
+    $definition = \Drupal::entityTypeManager()->getDefinition($type);
+    $column = $definition->getKey('bundle');
+
     $query = \Drupal::entityQuery($type);
     $query->condition($column, $bundles, 'IN');
     $ids = $query->execute();
@@ -189,20 +184,11 @@ class ConvertBundles {
     $results = [];
     $db = Database::getConnection();
     // Base tables have 'nid' and 'type' columns.
-    // TODO switch column names based on entity type!!!
-    $id = 'id';
-    $type = 'type';
-    if ($entity_type == 'node') {
-      $id = 'nid';
-    }
-    elseif ($entity_type == 'taxonomy_term') {
-      $id = 'tid';
-      $type = 'vid';
-    }
-    elseif ($entity_type == 'media') {
-      $id = 'mid';
-      $type = 'bundle';
-    }
+
+    $definition = \Drupal::entityTypeManager()->getDefinition($entity_type);
+    $id = $definition->getKey('id');
+    $type = $definition->getKey('bundle');
+
     foreach ($base_table_names as $table_name) {
       $results[] = $db->update($table_name)
         ->fields([$type => $to_type])
