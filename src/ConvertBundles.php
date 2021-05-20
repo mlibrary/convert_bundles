@@ -132,7 +132,7 @@ class ConvertBundles {
       if ($from == $to) {
         $update_fields[] = $from;
       }
-      elseif (in_array($from, $fields_new_to) && !in_array($from, $userInput)) {
+      elseif (in_array($from, $fields_new_to) && in_array($from, $userInput)) {
         $map_fields['create_new'][] = [
           'field' => $from,
           'value' => $to,
